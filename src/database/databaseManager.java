@@ -13,7 +13,7 @@ public class DatabaseManager {
                 // BẮT BUỘC: Nạp driver thủ công
                 Class.forName("org.sqlite.JDBC");
 
-                String url = "jdbc:sqlite:D:/zchessPM/db.db";
+                String url = "jdbc:sqlite:D:/ZChessManagementSystem/db.db";
                 connection = DriverManager.getConnection(url);
                 System.out.println("✅ Kết nối SQLite thành công!");
             } catch (ClassNotFoundException e) {
