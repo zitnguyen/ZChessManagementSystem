@@ -109,7 +109,6 @@ public class DatabaseInit {
                 stmt.execute(query);
             }
             
-            System.out.println("Database initialized successfully!");
             
         } catch (SQLException e) {
             e.printStackTrace();

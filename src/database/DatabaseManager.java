@@ -10,14 +10,13 @@ public class DatabaseManager {
     public static Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
             try {
-                // BẮT BUỘC: Nạp driver thủ công
                 Class.forName("org.sqlite.JDBC");
 
                 String url = "jdbc:sqlite:D:/ZChessManagementSystem/db.db";
                 connection = DriverManager.getConnection(url);
-                System.out.println("✅ Kết nối SQLite thành công!");
+                System.out.println("Kết nối SQLite thành công!");
             } catch (ClassNotFoundException e) {
-                System.err.println("❌ Không tìm thấy driver SQLite!");
+                System.err.println("Không tìm thấy driver SQLite!");
                 e.printStackTrace();
             }
         }
@@ -28,7 +27,7 @@ public class DatabaseManager {
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.close();
-                System.out.println("🔒 Đã đóng kết nối cơ sở dữ liệu.");
+                System.out.println("Đã đóng kết nối cơ sở dữ liệu.");
             }
         } catch (SQLException e) {
             e.printStackTrace();

@@ -10,7 +10,7 @@ public class StudentProgress {
     private String skillLevel; // beginner, intermediate, advanced
     private int eloRating;
     private String achievements;
- 
+    private String notes;
     public StudentProgress(int progressId, int studentId, LocalDate assessmentDate,
                           String skillLevel, int eloRating, String achievements,
                           String notes) {

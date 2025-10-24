@@ -1,11 +1,11 @@
 package dao;
 
 import database.DatabaseManager;
-import models.Expense;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import models.Expense;
 
 public class ExpenseDAO {
     
@@ -228,4 +228,4 @@ public class ExpenseDAO {
             rs.getString("payment_method"),
             rs.getString("paid_to"),
             rs.getString("notes")
-        );
+        );}}
