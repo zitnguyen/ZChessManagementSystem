@@ -17,7 +17,7 @@ public class StudentPanel extends JPanel {
     private JTable table;
     private DefaultTableModel tableModel;
 
-    private JTextField txtFullName, txtBirthDate, txtParentPhone, txtEmail, txtAddress, txtSearch;
+    private JTextField txtFullName, txtBirthDate, txtParentPhone, txtEmail, txtAddress, txtEnrollmentDate, txtSearch;
     private JTextArea txtNotes;
     private JComboBox<String> cboStatus;
 
@@ -31,6 +31,7 @@ public class StudentPanel extends JPanel {
         initComponents();
         loadStudentsData();
     }
+
     private void initComponents() {
         add(createTopPanel(), BorderLayout.NORTH);
         add(createTablePanel(), BorderLayout.CENTER);
@@ -77,7 +78,7 @@ public class StudentPanel extends JPanel {
         JPanel panel = new JPanel(new BorderLayout());
 
         String[] columns = {
-            "ID", "Họ tên", "Ngày sinh", "SĐT phụ huynh", "Email", "Ngày nhập học", "Trạng thái"
+            "ID", "Họ tên", "Ngày sinh", "SĐT PH", "Email", "Ngày nhập học", "Trạng thái"
         };
 
         tableModel = new DefaultTableModel(columns, 0) {
@@ -92,7 +93,7 @@ public class StudentPanel extends JPanel {
         table.setRowHeight(28);
         table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 13));
         table.getTableHeader().setBackground(new Color(52, 73, 94));
-        table.getTableHeader().setForeground(Color.WHITE);
+        table.getTableHeader().setForeground(Color.black);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         // ĐỔI MÀU HÀNG THEO TRẠNG THÁI
@@ -108,7 +109,7 @@ public class StudentPanel extends JPanel {
                     if ("inactive".equalsIgnoreCase(status)) {
                         c.setBackground(new Color(255, 255, 150));
                     } else if ("graduated".equalsIgnoreCase(status)) {
-                        c.setBackground(new Color(173, 216, 230));
+                        c.setBackground(Color.red);
                     } else {
                         c.setBackground(Color.WHITE);
                     }
@@ -143,6 +144,7 @@ public class StudentPanel extends JPanel {
         txtParentPhone = new JTextField(20);
         txtEmail = new JTextField(20);
         txtAddress = new JTextField(20);
+        txtEnrollmentDate = new JTextField(20); // 🆕 thêm ô nhập Ngày nhập học
         txtNotes = new JTextArea(3, 20);
         txtNotes.setLineWrap(true);
         txtNotes.setWrapStyleWord(true);
@@ -154,6 +156,7 @@ public class StudentPanel extends JPanel {
         panel.add(createFormRow("SĐT phụ huynh", txtParentPhone));
         panel.add(createFormRow("Email", txtEmail));
         panel.add(createFormRow("Địa chỉ", txtAddress));
+        panel.add(createFormRow("Ngày nhập học (dd/MM/yyyy)", txtEnrollmentDate)); // 🆕 thêm vào form
         panel.add(createFormRow("Trạng thái", cboStatus));
 
         JPanel notesPanel = new JPanel(new BorderLayout(5, 5));
@@ -203,9 +206,9 @@ public class StudentPanel extends JPanel {
 
     private JButton createStyledButton(String text, Color color) {
         JButton btn = new JButton(text);
-        btn.setFont(new Font("Arial", Font.BOLD, 13));
+        btn.setFont(new Font("Arial", Font.BOLD, 16));
         btn.setBackground(color);
-        btn.setForeground(Color.WHITE);
+        btn.setForeground(Color.black);
         btn.setFocusPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return btn;
@@ -222,6 +225,9 @@ public class StudentPanel extends JPanel {
             LocalDate birth = txtBirthDate.getText().isEmpty() ? null :
                     LocalDate.parse(txtBirthDate.getText().trim(), fmt);
 
+            LocalDate enrollment = txtEnrollmentDate.getText().isEmpty() ? LocalDate.now() :
+                    LocalDate.parse(txtEnrollmentDate.getText().trim(), fmt); // 🆕 thêm dòng này
+
             Student s = new Student(
                     txtFullName.getText().trim(),
                     birth,
@@ -231,7 +237,7 @@ public class StudentPanel extends JPanel {
                     txtNotes.getText().trim()
             );
             s.setStatus((String) cboStatus.getSelectedItem());
-            s.setEnrollmentDate(LocalDate.now());
+            s.setEnrollmentDate(enrollment); // 🆕 cập nhật enrollment
 
             if (studentDAO.addStudent(s)) {
                 JOptionPane.showMessageDialog(this, "✅ Thêm học viên thành công!");
@@ -257,6 +263,9 @@ public class StudentPanel extends JPanel {
             LocalDate birth = txtBirthDate.getText().isEmpty() ? null :
                     LocalDate.parse(txtBirthDate.getText().trim(), fmt);
 
+            LocalDate enrollment = txtEnrollmentDate.getText().isEmpty() ? LocalDate.now() :
+                    LocalDate.parse(txtEnrollmentDate.getText().trim(), fmt); // 🆕 thêm dòng này
+
             Student s = studentDAO.getStudentById(selectedStudentId);
             if (s == null) return;
 
@@ -267,6 +276,7 @@ public class StudentPanel extends JPanel {
             s.setAddress(txtAddress.getText().trim());
             s.setStatus((String) cboStatus.getSelectedItem());
             s.setNotes(txtNotes.getText().trim());
+            s.setEnrollmentDate(enrollment); // 🆕 cập nhật enrollment
 
             if (studentDAO.updateStudent(s)) {
                 JOptionPane.showMessageDialog(this, "✅ Cập nhật thành công!");
@@ -289,7 +299,6 @@ public class StudentPanel extends JPanel {
                 this, "Bạn có chắc muốn xóa học viên này?", "Xác nhận", JOptionPane.YES_NO_OPTION
         );
         if (confirm == JOptionPane.YES_OPTION && studentDAO.deleteStudent(selectedStudentId)) {
-            JOptionPane.showMessageDialog(this, "🗑️ Xóa thành công!");
             loadStudentsData();
             clearForm();
         }
@@ -352,6 +361,7 @@ public class StudentPanel extends JPanel {
         txtParentPhone.setText(s.getParentPhone());
         txtEmail.setText(s.getEmail());
         txtAddress.setText(s.getAddress());
+        txtEnrollmentDate.setText(s.getEnrollmentDate() != null ? s.getEnrollmentDate().format(fmt) : ""); // 🆕 hiển thị ngày nhập học
         cboStatus.setSelectedItem(s.getStatus());
         txtNotes.setText(s.getNotes());
     }
@@ -363,6 +373,7 @@ public class StudentPanel extends JPanel {
         txtParentPhone.setText("");
         txtEmail.setText("");
         txtAddress.setText("");
+        txtEnrollmentDate.setText(""); // 🆕 reset luôn ô này
         cboStatus.setSelectedIndex(0);
         txtNotes.setText("");
         table.clearSelection();
