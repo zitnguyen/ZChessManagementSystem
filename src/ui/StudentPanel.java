@@ -1,15 +1,15 @@
 package ui;
 
 import dao.StudentDAO;
-import models.Student;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import models.Student;
 
 public class StudentPanel extends JPanel {
 
@@ -31,8 +31,6 @@ public class StudentPanel extends JPanel {
         initComponents();
         loadStudentsData();
     }
-
-    // ======= INIT UI =======
     private void initComponents() {
         add(createTopPanel(), BorderLayout.NORTH);
         add(createTablePanel(), BorderLayout.CENTER);
@@ -44,25 +42,26 @@ public class StudentPanel extends JPanel {
         panel.setBackground(new Color(52, 152, 219));
         panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        JLabel titleLabel = new JLabel("📚 QUẢN LÝ HỌC VIÊN");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
-        titleLabel.setForeground(Color.WHITE);
+        JLabel titleLabel = new JLabel("QUẢN LÝ HỌC VIÊN");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 26));
+        titleLabel.setForeground(Color.black);
         panel.add(titleLabel, BorderLayout.WEST);
 
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         searchPanel.setOpaque(false);
 
         JLabel searchLabel = new JLabel("Tìm kiếm:");
-        searchLabel.setForeground(Color.WHITE);
+        searchLabel.setForeground(Color.black);
         searchLabel.setFont(new Font("Arial", Font.PLAIN, 14));
 
         txtSearch = new JTextField(20);
         txtSearch.setFont(new Font("Arial", Font.PLAIN, 14));
+        txtSearch.addActionListener(e -> searchStudents());
 
-        JButton btnSearch = createStyledButton("🔍 Tìm", new Color(46, 204, 113));
+        JButton btnSearch = createStyledButton("Tìm", new Color(46, 204, 113));
         btnSearch.addActionListener(e -> searchStudents());
 
-        JButton btnRefresh = createStyledButton("🔄 Làm mới", new Color(52, 73, 94));
+        JButton btnRefresh = createStyledButton("Làm mới", new Color(52, 73, 94));
         btnRefresh.addActionListener(e -> loadStudentsData());
 
         searchPanel.add(searchLabel);
@@ -78,22 +77,47 @@ public class StudentPanel extends JPanel {
         JPanel panel = new JPanel(new BorderLayout());
 
         String[] columns = {
-                "ID", "Họ tên", "Ngày sinh", "SĐT phụ huynh",
-                "Email", "Ngày nhập học", "Trạng thái"
+            "ID", "Họ tên", "Ngày sinh", "SĐT phụ huynh", "Email", "Ngày nhập học", "Trạng thái"
         };
 
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
-            public boolean isCellEditable(int row, int column) { return false; }
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
         };
 
         table = new JTable(tableModel);
         table.setFont(new Font("Arial", Font.PLAIN, 13));
-        table.setRowHeight(30);
+        table.setRowHeight(28);
         table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 13));
         table.getTableHeader().setBackground(new Color(52, 73, 94));
         table.getTableHeader().setForeground(Color.WHITE);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        // ĐỔI MÀU HÀNG THEO TRẠNG THÁI
+        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                String status = (String) table.getValueAt(row, 6);
+
+                if (!isSelected) {
+                    if ("inactive".equalsIgnoreCase(status)) {
+                        c.setBackground(new Color(255, 255, 150));
+                    } else if ("graduated".equalsIgnoreCase(status)) {
+                        c.setBackground(new Color(173, 216, 230));
+                    } else {
+                        c.setBackground(Color.WHITE);
+                    }
+                } else {
+                    c.setBackground(new Color(135, 206, 250));
+                }
+                return c;
+            }
+        });
 
         table.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && table.getSelectedRow() >= 0) {
@@ -102,9 +126,7 @@ public class StudentPanel extends JPanel {
         });
 
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(Color.GRAY), "Danh sách học viên"
-        ));
+        scrollPane.setBorder(BorderFactory.createTitledBorder("Danh sách học viên"));
 
         panel.add(scrollPane, BorderLayout.CENTER);
         return panel;
@@ -114,8 +136,7 @@ public class StudentPanel extends JPanel {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setPreferredSize(new Dimension(350, 0));
-        panel.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(Color.GRAY), "Thông tin học viên"));
+        panel.setBorder(BorderFactory.createTitledBorder("Thông tin học viên"));
 
         txtFullName = new JTextField(20);
         txtBirthDate = new JTextField(20);
@@ -126,8 +147,7 @@ public class StudentPanel extends JPanel {
         txtNotes.setLineWrap(true);
         txtNotes.setWrapStyleWord(true);
 
-        String[] statuses = {"active", "inactive", "graduated"};
-        cboStatus = new JComboBox<>(statuses);
+        cboStatus = new JComboBox<>(new String[]{"active", "inactive", "graduated"});
 
         panel.add(createFormRow("Họ tên (*)", txtFullName));
         panel.add(createFormRow("Ngày sinh (dd/MM/yyyy)", txtBirthDate));
@@ -150,27 +170,27 @@ public class StudentPanel extends JPanel {
 
     private JPanel createFormRow(String label, JComponent component) {
         JPanel row = new JPanel(new BorderLayout(5, 5));
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
         JLabel lbl = new JLabel(label);
-        lbl.setPreferredSize(new Dimension(150, 25));
+        lbl.setPreferredSize(new Dimension(140, 25));
         row.add(lbl, BorderLayout.WEST);
         row.add(component, BorderLayout.CENTER);
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
         return row;
     }
 
     private JPanel createButtonPanel() {
         JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
 
-        JButton btnAdd = createStyledButton("➕ Thêm mới", new Color(46, 204, 113));
+        JButton btnAdd = createStyledButton("Thêm mới", new Color(52, 152, 219));
         btnAdd.addActionListener(e -> addStudent());
 
-        JButton btnUpdate = createStyledButton("✏️ Cập nhật", new Color(52, 152, 219));
+        JButton btnUpdate = createStyledButton("Cập nhật", new Color(46, 204, 113));
         btnUpdate.addActionListener(e -> updateStudent());
 
-        JButton btnDelete = createStyledButton("🗑️ Xóa", new Color(231, 76, 60));
+        JButton btnDelete = createStyledButton("Xóa", new Color(231, 76, 60));
         btnDelete.addActionListener(e -> deleteStudent());
 
-        JButton btnClear = createStyledButton("🔄 Làm mới form", new Color(149, 165, 166));
+        JButton btnClear = createStyledButton("Làm mới form", new Color(149, 165, 166));
         btnClear.addActionListener(e -> clearForm());
 
         panel.add(btnAdd);
@@ -182,60 +202,25 @@ public class StudentPanel extends JPanel {
     }
 
     private JButton createStyledButton(String text, Color color) {
-        JButton button = new JButton(text);
-        button.setFont(new Font("Arial", Font.BOLD, 13));
-        button.setBackground(color);
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        return button;
+        JButton btn = new JButton(text);
+        btn.setFont(new Font("Arial", Font.BOLD, 13));
+        btn.setBackground(color);
+        btn.setForeground(Color.WHITE);
+        btn.setFocusPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return btn;
     }
 
-    // ======= DATA HANDLERS =======
-    private void loadStudentsData() {
-        tableModel.setRowCount(0);
-        List<Student> students = studentDAO.getAllStudents();
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-        for (Student s : students) {
-            tableModel.addRow(new Object[]{
-                    s.getStudentId(),
-                    s.getFullName(),
-                    s.getBirthDate() != null ? s.getBirthDate().format(fmt) : "",
-                    s.getParentPhone(),
-                    s.getEmail(),
-                    s.getEnrollmentDate() != null ? s.getEnrollmentDate().format(fmt) : "",
-                    s.getStatus()
-            });
-        }
-        clearForm();
-    }
-
-    private void loadStudentToForm(int rowIndex) {
-        selectedStudentId = (int) tableModel.getValueAt(rowIndex, 0);
-        Student s = studentDAO.getStudentById(selectedStudentId);
-
-        if (s != null) {
-            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            txtFullName.setText(s.getFullName());
-            txtBirthDate.setText(s.getBirthDate() != null ? s.getBirthDate().format(fmt) : "");
-            txtParentPhone.setText(s.getParentPhone());
-            txtEmail.setText(s.getEmail());
-            txtAddress.setText(s.getAddress());
-            cboStatus.setSelectedItem(s.getStatus());
-            txtNotes.setText(s.getNotes());
-        }
-    }
+    // =============================
+    // CÁC XỬ LÝ NGHIỆP VỤ
+    // =============================
 
     private void addStudent() {
         if (!validateInput()) return;
-
         try {
             DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            LocalDate birth = txtBirthDate.getText().trim().isEmpty() ? null
-                    : LocalDate.parse(txtBirthDate.getText().trim(), fmt);
-
-            LocalDate enrollment = LocalDate.now();
+            LocalDate birth = txtBirthDate.getText().isEmpty() ? null :
+                    LocalDate.parse(txtBirthDate.getText().trim(), fmt);
 
             Student s = new Student(
                     txtFullName.getText().trim(),
@@ -243,37 +228,38 @@ public class StudentPanel extends JPanel {
                     txtParentPhone.getText().trim(),
                     txtEmail.getText().trim(),
                     txtAddress.getText().trim(),
-                    enrollment,
-                    (String) cboStatus.getSelectedItem(),
                     txtNotes.getText().trim()
             );
+            s.setStatus((String) cboStatus.getSelectedItem());
+            s.setEnrollmentDate(LocalDate.now());
 
             if (studentDAO.addStudent(s)) {
                 JOptionPane.showMessageDialog(this, "✅ Thêm học viên thành công!");
-                clearForm();
                 loadStudentsData();
+                clearForm();
             } else {
                 JOptionPane.showMessageDialog(this, "❌ Thêm thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
-
-        } catch (DateTimeParseException ex) {
-            JOptionPane.showMessageDialog(this, "❌ Sai định dạng ngày (dd/MM/yyyy)!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        } catch (DateTimeParseException e) {
+            JOptionPane.showMessageDialog(this, "Sai định dạng ngày (dd/MM/yyyy)!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void updateStudent() {
         if (selectedStudentId == -1) {
-            JOptionPane.showMessageDialog(this, "⚠️ Vui lòng chọn học viên!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn học viên để cập nhật!");
             return;
         }
         if (!validateInput()) return;
 
         try {
             DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            LocalDate birth = txtBirthDate.getText().trim().isEmpty() ? null
-                    : LocalDate.parse(txtBirthDate.getText().trim(), fmt);
+            LocalDate birth = txtBirthDate.getText().isEmpty() ? null :
+                    LocalDate.parse(txtBirthDate.getText().trim(), fmt);
 
             Student s = studentDAO.getStudentById(selectedStudentId);
+            if (s == null) return;
+
             s.setFullName(txtFullName.getText().trim());
             s.setBirthDate(birth);
             s.setParentPhone(txtParentPhone.getText().trim());
@@ -284,32 +270,28 @@ public class StudentPanel extends JPanel {
 
             if (studentDAO.updateStudent(s)) {
                 JOptionPane.showMessageDialog(this, "✅ Cập nhật thành công!");
-                clearForm();
                 loadStudentsData();
+                clearForm();
             } else {
                 JOptionPane.showMessageDialog(this, "❌ Cập nhật thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
-
-        } catch (DateTimeParseException ex) {
-            JOptionPane.showMessageDialog(this, "❌ Sai định dạng ngày!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        } catch (DateTimeParseException e) {
+            JOptionPane.showMessageDialog(this, "Sai định dạng ngày!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void deleteStudent() {
         if (selectedStudentId == -1) {
-            JOptionPane.showMessageDialog(this, "⚠️ Vui lòng chọn học viên để xóa!");
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn học viên để xóa!");
             return;
         }
         int confirm = JOptionPane.showConfirmDialog(
-                this,
-                "Bạn có chắc muốn xóa học viên này? (sẽ chuyển sang inactive)",
-                "Xác nhận",
-                JOptionPane.YES_NO_OPTION
+                this, "Bạn có chắc muốn xóa học viên này?", "Xác nhận", JOptionPane.YES_NO_OPTION
         );
         if (confirm == JOptionPane.YES_OPTION && studentDAO.deleteStudent(selectedStudentId)) {
-            JOptionPane.showMessageDialog(this, "✅ Xóa thành công!");
-            clearForm();
+            JOptionPane.showMessageDialog(this, "🗑️ Xóa thành công!");
             loadStudentsData();
+            clearForm();
         }
     }
 
@@ -335,15 +317,43 @@ public class StudentPanel extends JPanel {
                     s.getStatus()
             });
         }
-        clearForm();
+        table.clearSelection();
+        selectedStudentId = -1;
     }
 
-    private boolean validateInput() {
-        if (txtFullName.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "⚠️ Họ tên không được để trống!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
-            return false;
+    private void loadStudentsData() {
+        tableModel.setRowCount(0);
+        List<Student> list = studentDAO.getAllStudents();
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        for (Student s : list) {
+            tableModel.addRow(new Object[]{
+                    s.getStudentId(),
+                    s.getFullName(),
+                    s.getBirthDate() != null ? s.getBirthDate().format(fmt) : "",
+                    s.getParentPhone(),
+                    s.getEmail(),
+                    s.getEnrollmentDate() != null ? s.getEnrollmentDate().format(fmt) : "",
+                    s.getStatus()
+            });
         }
-        return true;
+        table.clearSelection();
+        selectedStudentId = -1;
+    }
+
+    private void loadStudentToForm(int row) {
+        selectedStudentId = (int) tableModel.getValueAt(row, 0);
+        Student s = studentDAO.getStudentById(selectedStudentId);
+        if (s == null) return;
+
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        txtFullName.setText(s.getFullName());
+        txtBirthDate.setText(s.getBirthDate() != null ? s.getBirthDate().format(fmt) : "");
+        txtParentPhone.setText(s.getParentPhone());
+        txtEmail.setText(s.getEmail());
+        txtAddress.setText(s.getAddress());
+        cboStatus.setSelectedItem(s.getStatus());
+        txtNotes.setText(s.getNotes());
     }
 
     private void clearForm() {
@@ -356,5 +366,13 @@ public class StudentPanel extends JPanel {
         cboStatus.setSelectedIndex(0);
         txtNotes.setText("");
         table.clearSelection();
+    }
+
+    private boolean validateInput() {
+        if (txtFullName.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "⚠️ Họ tên không được để trống!");
+            return false;
+        }
+        return true;
     }
 }

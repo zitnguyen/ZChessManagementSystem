@@ -1,14 +1,14 @@
 package dao;
 
 import database.DatabaseManager;
-import models.Student;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import models.Student;
 
 public class StudentDAO {
-    
+
     // ➕ Thêm học viên mới
     public boolean addStudent(Student student) {
         String sql = "INSERT INTO students (full_name, birth_date, parent_phone, " +
@@ -34,7 +34,7 @@ public class StudentDAO {
             return false;
         }
     }
-    
+
     // ✏️ Cập nhật thông tin học viên
     public boolean updateStudent(Student student) {
         String sql = "UPDATE students SET full_name = ?, birth_date = ?, parent_phone = ?, " +
@@ -60,25 +60,9 @@ public class StudentDAO {
             return false;
         }
     }
-    
-    // 🗑️ Xóa học viên (soft delete)
+
+    // ❌ Xóa học viên (nghỉ học là xóa hẳn)
     public boolean deleteStudent(int studentId) {
-        String sql = "UPDATE students SET status = 'inactive' WHERE student_id = ?";
-        
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setInt(1, studentId);
-            return pstmt.executeUpdate() > 0;
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-    
-    // 🚫 Xóa vĩnh viễn
-    public boolean permanentDeleteStudent(int studentId) {
         String sql = "DELETE FROM students WHERE student_id = ?";
         
         try (Connection conn = DatabaseManager.getConnection();
@@ -92,7 +76,7 @@ public class StudentDAO {
             return false;
         }
     }
-    
+
     // 🔍 Lấy học viên theo ID
     public Student getStudentById(int studentId) {
         String sql = "SELECT * FROM students WHERE student_id = ?";
@@ -112,7 +96,7 @@ public class StudentDAO {
         }
         return null;
     }
-    
+
     // 📋 Lấy tất cả học viên
     public List<Student> getAllStudents() {
         List<Student> students = new ArrayList<>();
@@ -131,28 +115,7 @@ public class StudentDAO {
         }
         return students;
     }
-    
-    // 🧾 Lấy học viên theo trạng thái
-    public List<Student> getStudentsByStatus(String status) {
-        List<Student> students = new ArrayList<>();
-        String sql = "SELECT * FROM students WHERE status = ? ORDER BY full_name";
-        
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setString(1, status);
-            ResultSet rs = pstmt.executeQuery();
-            
-            while (rs.next()) {
-                students.add(extractStudentFromResultSet(rs));
-            }
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return students;
-    }
-    
+
     // 🔎 Tìm kiếm học viên theo tên
     public List<Student> searchStudentsByName(String keyword) {
         List<Student> students = new ArrayList<>();
@@ -173,10 +136,10 @@ public class StudentDAO {
         }
         return students;
     }
-    
+
     // 📊 Đếm tổng số học viên
     public int getTotalStudents() {
-        String sql = "SELECT COUNT(*) FROM students WHERE status = 'active'";
+        String sql = "SELECT COUNT(*) FROM students";
         
         try (Connection conn = DatabaseManager.getConnection();
              Statement stmt = conn.createStatement();
@@ -191,7 +154,7 @@ public class StudentDAO {
         }
         return 0;
     }
-    
+
     // 🧩 Helper: Chuyển ResultSet → Student object
     private Student extractStudentFromResultSet(ResultSet rs) throws SQLException {
         int id = rs.getInt("student_id");
