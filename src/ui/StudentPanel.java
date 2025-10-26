@@ -78,7 +78,7 @@ public class StudentPanel extends JPanel {
         JPanel panel = new JPanel(new BorderLayout());
 
         String[] columns = {
-            "ID", "Họ tên", "Ngày sinh", "SĐT PH", "Email", "Ngày nhập học", "Trạng thái"
+            "ID", "Name", "Birth Date", "Phone", "Email", "Enrollment Date", "Status"
         };
 
         tableModel = new DefaultTableModel(columns, 0) {
@@ -86,12 +86,14 @@ public class StudentPanel extends JPanel {
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
+
         };
 
         table = new JTable(tableModel);
+
         table.setFont(new Font("Arial", Font.PLAIN, 13));
         table.setRowHeight(28);
-        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 13));
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
         table.getTableHeader().setBackground(new Color(52, 73, 94));
         table.getTableHeader().setForeground(Color.black);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -114,7 +116,7 @@ public class StudentPanel extends JPanel {
                         c.setBackground(Color.WHITE);
                     }
                 } else {
-                    c.setBackground(new Color(135, 206, 250));
+                    c.setBackground(Color.pink);
                 }
                 return c;
             }
@@ -136,10 +138,12 @@ public class StudentPanel extends JPanel {
     private JPanel createFormPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setPreferredSize(new Dimension(350, 0));
+        panel.setPreferredSize(new Dimension(350, 20));
         panel.setBorder(BorderFactory.createTitledBorder("Thông tin học viên"));
 
         txtFullName = new JTextField(20);
+        txtFullName.addActionListener(e -> addStudent());
+
         txtBirthDate = new JTextField(20);
         txtParentPhone = new JTextField(20);
         txtEmail = new JTextField(20);
@@ -152,6 +156,7 @@ public class StudentPanel extends JPanel {
         cboStatus = new JComboBox<>(new String[]{"active", "inactive", "graduated"});
 
         panel.add(createFormRow("Họ tên (*)", txtFullName));
+
         panel.add(createFormRow("Ngày sinh (dd/MM/yyyy)", txtBirthDate));
         panel.add(createFormRow("SĐT phụ huynh", txtParentPhone));
         panel.add(createFormRow("Email", txtEmail));
@@ -217,16 +222,17 @@ public class StudentPanel extends JPanel {
     // =============================
     // CÁC XỬ LÝ NGHIỆP VỤ
     // =============================
-
     private void addStudent() {
-        if (!validateInput()) return;
+        if (!validateInput()) {
+            return;
+        }
         try {
             DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            LocalDate birth = txtBirthDate.getText().isEmpty() ? null :
-                    LocalDate.parse(txtBirthDate.getText().trim(), fmt);
+            LocalDate birth = txtBirthDate.getText().isEmpty() ? null
+                    : LocalDate.parse(txtBirthDate.getText().trim(), fmt);
 
-            LocalDate enrollment = txtEnrollmentDate.getText().isEmpty() ? LocalDate.now() :
-                    LocalDate.parse(txtEnrollmentDate.getText().trim(), fmt); // 🆕 thêm dòng này
+            LocalDate enrollment = txtEnrollmentDate.getText().isEmpty() ? LocalDate.now()
+                    : LocalDate.parse(txtEnrollmentDate.getText().trim(), fmt); // 🆕 thêm dòng này
 
             Student s = new Student(
                     txtFullName.getText().trim(),
@@ -256,18 +262,22 @@ public class StudentPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn học viên để cập nhật!");
             return;
         }
-        if (!validateInput()) return;
+        if (!validateInput()) {
+            return;
+        }
 
         try {
             DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            LocalDate birth = txtBirthDate.getText().isEmpty() ? null :
-                    LocalDate.parse(txtBirthDate.getText().trim(), fmt);
+            LocalDate birth = txtBirthDate.getText().isEmpty() ? null
+                    : LocalDate.parse(txtBirthDate.getText().trim(), fmt);
 
-            LocalDate enrollment = txtEnrollmentDate.getText().isEmpty() ? LocalDate.now() :
-                    LocalDate.parse(txtEnrollmentDate.getText().trim(), fmt); // 🆕 thêm dòng này
+            LocalDate enrollment = txtEnrollmentDate.getText().isEmpty() ? LocalDate.now()
+                    : LocalDate.parse(txtEnrollmentDate.getText().trim(), fmt); // 🆕 thêm dòng này
 
             Student s = studentDAO.getStudentById(selectedStudentId);
-            if (s == null) return;
+            if (s == null) {
+                return;
+            }
 
             s.setFullName(txtFullName.getText().trim());
             s.setBirthDate(birth);
@@ -317,13 +327,13 @@ public class StudentPanel extends JPanel {
 
         for (Student s : list) {
             tableModel.addRow(new Object[]{
-                    s.getStudentId(),
-                    s.getFullName(),
-                    s.getBirthDate() != null ? s.getBirthDate().format(fmt) : "",
-                    s.getParentPhone(),
-                    s.getEmail(),
-                    s.getEnrollmentDate() != null ? s.getEnrollmentDate().format(fmt) : "",
-                    s.getStatus()
+                s.getStudentId(),
+                s.getFullName(),
+                s.getBirthDate() != null ? s.getBirthDate().format(fmt) : "",
+                s.getParentPhone(),
+                s.getEmail(),
+                s.getEnrollmentDate() != null ? s.getEnrollmentDate().format(fmt) : "",
+                s.getStatus()
             });
         }
         table.clearSelection();
@@ -337,13 +347,13 @@ public class StudentPanel extends JPanel {
 
         for (Student s : list) {
             tableModel.addRow(new Object[]{
-                    s.getStudentId(),
-                    s.getFullName(),
-                    s.getBirthDate() != null ? s.getBirthDate().format(fmt) : "",
-                    s.getParentPhone(),
-                    s.getEmail(),
-                    s.getEnrollmentDate() != null ? s.getEnrollmentDate().format(fmt) : "",
-                    s.getStatus()
+                s.getStudentId(),
+                s.getFullName(),
+                s.getBirthDate() != null ? s.getBirthDate().format(fmt) : "",
+                s.getParentPhone(),
+                s.getEmail(),
+                s.getEnrollmentDate() != null ? s.getEnrollmentDate().format(fmt) : "",
+                s.getStatus()
             });
         }
         table.clearSelection();
@@ -353,7 +363,9 @@ public class StudentPanel extends JPanel {
     private void loadStudentToForm(int row) {
         selectedStudentId = (int) tableModel.getValueAt(row, 0);
         Student s = studentDAO.getStudentById(selectedStudentId);
-        if (s == null) return;
+        if (s == null) {
+            return;
+        }
 
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         txtFullName.setText(s.getFullName());

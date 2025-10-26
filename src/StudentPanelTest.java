@@ -19,7 +19,7 @@ public class StudentPanelTest {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("TEST: Student Panel");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(1000, 600);
+            frame.setSize(1200, 600);
             frame.setLocationRelativeTo(null);
             
             // Add StudentPanel vào Frame
