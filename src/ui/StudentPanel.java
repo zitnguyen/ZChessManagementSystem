@@ -17,7 +17,7 @@ public class StudentPanel extends JPanel {
     private JTable table;
     private DefaultTableModel tableModel;
 
-    private JTextField txtFullName, txtBirthDate, txtPhone, txtParentPhone, txtEmail, txtAddress, txtSearch;
+    private JTextField txtFullName, txtBirthDate, txtParentPhone, txtEmail, txtAddress, txtSearch;
     private JTextArea txtNotes;
     private JComboBox<String> cboStatus;
 
@@ -78,7 +78,7 @@ public class StudentPanel extends JPanel {
         JPanel panel = new JPanel(new BorderLayout());
 
         String[] columns = {
-                "ID", "Họ tên", "Ngày sinh", "SĐT", "SĐT phụ huynh",
+                "ID", "Họ tên", "Ngày sinh", "SĐT phụ huynh",
                 "Email", "Ngày nhập học", "Trạng thái"
         };
 
@@ -119,7 +119,6 @@ public class StudentPanel extends JPanel {
 
         txtFullName = new JTextField(20);
         txtBirthDate = new JTextField(20);
-        txtPhone = new JTextField(20);
         txtParentPhone = new JTextField(20);
         txtEmail = new JTextField(20);
         txtAddress = new JTextField(20);
@@ -132,7 +131,6 @@ public class StudentPanel extends JPanel {
 
         panel.add(createFormRow("Họ tên (*)", txtFullName));
         panel.add(createFormRow("Ngày sinh (dd/MM/yyyy)", txtBirthDate));
-        panel.add(createFormRow("SĐT", txtPhone));
         panel.add(createFormRow("SĐT phụ huynh", txtParentPhone));
         panel.add(createFormRow("Email", txtEmail));
         panel.add(createFormRow("Địa chỉ", txtAddress));
@@ -204,7 +202,6 @@ public class StudentPanel extends JPanel {
                     s.getStudentId(),
                     s.getFullName(),
                     s.getBirthDate() != null ? s.getBirthDate().format(fmt) : "",
-                    s.getPhone(),
                     s.getParentPhone(),
                     s.getEmail(),
                     s.getEnrollmentDate() != null ? s.getEnrollmentDate().format(fmt) : "",
@@ -222,7 +219,6 @@ public class StudentPanel extends JPanel {
             DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             txtFullName.setText(s.getFullName());
             txtBirthDate.setText(s.getBirthDate() != null ? s.getBirthDate().format(fmt) : "");
-            txtPhone.setText(s.getPhone());
             txtParentPhone.setText(s.getParentPhone());
             txtEmail.setText(s.getEmail());
             txtAddress.setText(s.getAddress());
@@ -244,7 +240,6 @@ public class StudentPanel extends JPanel {
             Student s = new Student(
                     txtFullName.getText().trim(),
                     birth,
-                    txtPhone.getText().trim(),
                     txtParentPhone.getText().trim(),
                     txtEmail.getText().trim(),
                     txtAddress.getText().trim(),
@@ -255,6 +250,7 @@ public class StudentPanel extends JPanel {
 
             if (studentDAO.addStudent(s)) {
                 JOptionPane.showMessageDialog(this, "✅ Thêm học viên thành công!");
+                clearForm();
                 loadStudentsData();
             } else {
                 JOptionPane.showMessageDialog(this, "❌ Thêm thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
@@ -280,7 +276,6 @@ public class StudentPanel extends JPanel {
             Student s = studentDAO.getStudentById(selectedStudentId);
             s.setFullName(txtFullName.getText().trim());
             s.setBirthDate(birth);
-            s.setPhone(txtPhone.getText().trim());
             s.setParentPhone(txtParentPhone.getText().trim());
             s.setEmail(txtEmail.getText().trim());
             s.setAddress(txtAddress.getText().trim());
@@ -289,6 +284,7 @@ public class StudentPanel extends JPanel {
 
             if (studentDAO.updateStudent(s)) {
                 JOptionPane.showMessageDialog(this, "✅ Cập nhật thành công!");
+                clearForm();
                 loadStudentsData();
             } else {
                 JOptionPane.showMessageDialog(this, "❌ Cập nhật thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
@@ -312,6 +308,7 @@ public class StudentPanel extends JPanel {
         );
         if (confirm == JOptionPane.YES_OPTION && studentDAO.deleteStudent(selectedStudentId)) {
             JOptionPane.showMessageDialog(this, "✅ Xóa thành công!");
+            clearForm();
             loadStudentsData();
         }
     }
@@ -332,7 +329,6 @@ public class StudentPanel extends JPanel {
                     s.getStudentId(),
                     s.getFullName(),
                     s.getBirthDate() != null ? s.getBirthDate().format(fmt) : "",
-                    s.getPhone(),
                     s.getParentPhone(),
                     s.getEmail(),
                     s.getEnrollmentDate() != null ? s.getEnrollmentDate().format(fmt) : "",
@@ -354,7 +350,6 @@ public class StudentPanel extends JPanel {
         selectedStudentId = -1;
         txtFullName.setText("");
         txtBirthDate.setText("");
-        txtPhone.setText("");
         txtParentPhone.setText("");
         txtEmail.setText("");
         txtAddress.setText("");
